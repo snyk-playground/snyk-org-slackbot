@@ -1,0 +1,18 @@
+# Where should the Slack bot get our Slack tokens from
+slack_bot_token_env_var_name: "SLACK_BOT_TOKEN"
+slack_app_token_env_var_name: "SLACK_APP_TOKEN"
+
+# Where should the Slack bot get your Snyk token from
+snyk_token_env_var_name: "SNYK_TOKEN"
+
+# The group we'll be placing new orgs under
+snyk_group_id: "YOUR_SNYK_GROUP"
+
+# Multiple orgs with the same name are allowed in Snyk, but should the bot allow this?
+allow_duplicate_org_names: False
+
+# Business unit must follow the regex pattern to be accepted
+business_unit_regex_pattern: ".*"
+
+# Team name must follow the regex pattern to be accepted
+team_name_regex_pattern: ".*"

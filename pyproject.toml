@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "snyk_org_slackbot"
+version = "0.1.0"
+description = "A Slack bot which allows you to provide self-service Snyk organisation creation to your users. "
+authors = ["Nathan Roys <nathan.roys@snyk.io>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pysnyk = "^0.9.3"
+PyYAML = "^6.0"
+pysos = "^1.2.7"
+stones = "^0.1.4"
+lmdb = "^1.3.0"
+slack-bolt = "^1.15.0"
+
+[tool.poetry.dev-dependencies]
+black = "^22.8.0"
+isort = "^5.10.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
