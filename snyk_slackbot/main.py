@@ -19,10 +19,15 @@ app = App(token=os.environ[settings.config("slack_bot_token_env_var_name")])
 # Set up our regex matching patterns
 business_unit_pattern = re.compile(settings.config("business_unit_regex_pattern"))
 team_name_pattern = re.compile(settings.config("team_name_regex_pattern"))
+# SSO params
+sso_provider_name = settings.config("sso_provider_name")
+sso_provider_link = settings.config("sso_sign_in_link")
+# Commands
+command_create_org = settings.config("command_create_org")
 
 
-@app.command("/createorg")
-def create_org_modal(ack, body, client):
+@app.command(f"/{command_create_org}")
+def create_org_modal(ack, body, client, say):
     ack()
     client.views_open(
         trigger_id=body["trigger_id"],
@@ -118,6 +123,10 @@ def create_org_modal(ack, body, client):
 def handle_view_events(ack, body, client, say):
     ack()
     requesting_user = body["user"]
+    requesting_user_email = app.client.users_info(user=requesting_user["id"])["user"][
+        "profile"
+    ]["email"]
+    snyk_user = api.get_user(requesting_user_email)
     view_state = body["view"]["state"]
 
     # Let's open a DM channel with the requesting user
@@ -136,18 +145,57 @@ def handle_view_events(ack, body, client, say):
         "team_name": team_name,
         "requesting_user": requesting_user,
     }
+    if not snyk_user:
+        say(
+            channel=channel_id,
+            blocks=[
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Great, I've got your request!*",
+                    },
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"Before your request is processed you *must* first log in to Snyk via {sso_provider_name}. This is to ensure that when we create your org we can assign you admin rights. <{sso_provider_link}|Open {sso_provider_name}>",
+                    },
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": f":white_check_mark: I've signed in via {sso_provider_name}",
+                                "emoji": True,
+                            },
+                            "value": "sso_confirmed",
+                            "action_id": "action-sso-confirmed",
+                        }
+                    ],
+                },
+            ],
+        )
+    else:
+        confirm_org(None, say, channel_id)
+
+
+@app.action("action-sso-confirmed")
+def confirm_org(ack, say, channel_id):
+    if ack:
+        ack()
     say(
         channel=channel_id,
         blocks=[
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": "*Great, I've got your request!*"},
-            },
-            {
-                "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Before your request is processed you *must* first log in to Snyk via Okta. This is to ensure that when we create your org we can assign you admin rights. <http://www.example.com|Open Okta>",
+                    "text": f"*Great! - We're set* I'll create an org named *{channel_datastore[channel_id]['business_unit']}-{channel_datastore[channel_id]['team_name']}* - does that look right?",
                 },
             },
             {
@@ -157,20 +205,32 @@ def handle_view_events(ack, body, client, say):
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": ":white_check_mark: I've signed in via Okta",
+                            "text": ":white_check_mark: Looks good!",
                             "emoji": True,
                         },
-                        "value": "click_me_123",
-                        "action_id": "action-okta-confirmed",
-                    }
+                        "style": "primary",
+                        "value": "confirmed",
+                        "action_id": "action-confirmed",
+                    },
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": ":no_entry: Something looks wrong",
+                            "emoji": True,
+                        },
+                        "style": "danger",
+                        "value": "cancelled",
+                        "action_id": "action-cancelled",
+                    },
                 ],
             },
         ],
     )
 
 
-@app.action("action-okta-confirmed")
-def handle_okta_confirm(ack, body, client, say):
+@app.action("action-confirmed")
+def handle_sso_confirm(ack, body, client, say):
     ack()
     channel_id = body["channel"]["id"]
     data = channel_datastore[channel_id]
@@ -220,7 +280,7 @@ def handle_okta_confirm(ack, body, client, say):
     snyk_user = api.get_user(requesting_user_email)
     if not snyk_user:
         say(
-            text=f":warning: I couldn't find your user in Snyk - please try again to log-in through Okta and request your"
+            text=f":warning: I couldn't find your user in Snyk - please try again to log-in through {sso_provider_name} and request your"
             f"organisation again!",
             channel=channel_id,
         )

@@ -16,3 +16,12 @@ business_unit_regex_pattern: ".*"
 
 # Team name must follow the regex pattern to be accepted
 team_name_regex_pattern: ".*"
+
+# The command to use for creating an org
+command_create_org: "createorg"
+
+# The link we'll send users to, to log in to Snyk
+sso_sign_in_link: "https://google.com"
+
+# SSO provider name
+sso_provider_name: "Okta"
