@@ -1,0 +1,34 @@
+[
+   {
+      "type":"section",
+      "text":{
+         "type":"mrkdwn",
+         "text":":white_check_mark: *Looks good!* I have created your Snyk organisation and added you as an administrator user, here are the details:"
+      }
+   },
+   {
+      "type":"section",
+      "text":{
+         "type":"mrkdwn",
+         "text":"The name of your organisation is *{{org_name}}* and it's ID is *{{org_id}}*"
+      }
+   },
+   {
+      "type":"section",
+      "text":{
+         "type":"mrkdwn",
+         "text":"Link to your organisation"
+      },
+      "accessory":{
+         "type":"button",
+         "text":{
+            "type":"plain_text",
+            "text":"Click To Open",
+            "emoji":true
+         },
+         "value":"click_me_123",
+         "url":"{{result_url}}",
+         "action_id":"button-action"
+      }
+   }
+]

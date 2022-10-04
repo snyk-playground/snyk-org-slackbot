@@ -1,0 +1,36 @@
+[
+   {
+      "type":"section",
+      "text":{
+         "type":"mrkdwn",
+         "text":"*Great! - We're set* I'll create an org named *{{business_unit}}-{{team_name}}* - does that look right?"
+      }
+   },
+   {
+      "type":"actions",
+      "elements":[
+         {
+            "type":"button",
+            "text":{
+               "type":"plain_text",
+               "text":":white_check_mark: Looks good!",
+               "emoji":true
+            },
+            "style":"primary",
+            "value":"confirmed",
+            "action_id":"action-confirmed"
+         },
+         {
+            "type":"button",
+            "text":{
+               "type":"plain_text",
+               "text":":no_entry: Something looks wrong",
+               "emoji":true
+            },
+            "style":"danger",
+            "value":"cancelled",
+            "action_id":"action-cancelled"
+         }
+      ]
+   }
+]

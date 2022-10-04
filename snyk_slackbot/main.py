@@ -1,7 +1,9 @@
+import json
 import os
 import re
 
 from api import SnykApiFacade
+from jinja2 import Environment, FileSystemLoader
 from settings import Settings
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
@@ -24,103 +26,46 @@ sso_provider_name = settings.config("sso_provider_name")
 sso_provider_link = settings.config("sso_sign_in_link")
 # Commands
 command_create_org = settings.config("command_create_org")
+# Jinja2 environment
+environment = Environment(loader=FileSystemLoader("./templates/"))
+
+
+def load_blocks_views(view_name, **kwargs):
+    """
+    Will load a view, template it with the args given and return a python object
+    :param view_name: the name of the view (file name without .json)
+    :param kwargs: kwargs
+    :return: python object representation of the view
+    """
+    template = environment.get_template(f"{view_name}.json")
+    str_output = template.render(kwargs)
+    print(str_output)
+    return json.loads(str_output)
 
 
 @app.command(f"/{command_create_org}")
-def create_org_modal(ack, body, client, say):
+def create_org_modal(ack, body, client):
+    """
+    Shows the initial modal for org creation (user input screen)
+    :param ack: slack ack
+    :param body: slack body
+    :param client: slack client
+    """
     ack()
     client.views_open(
-        trigger_id=body["trigger_id"],
-        view={
-            "type": "modal",
-            "callback_id": "create_org_callback",
-            "title": {"type": "plain_text", "text": "Snyk Org Creation Tool"},
-            "submit": {"type": "plain_text", "text": "Create my organisation"},
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Let's get started.* To create your Snyk org, I'll first need some information from"
-                        " you.",
-                    },
-                },
-                {"type": "divider"},
-                {
-                    "type": "input",
-                    "block_id": "block_business_unit",
-                    "element": {
-                        "type": "plain_text_input",
-                        "action_id": "input_business_unit",
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "What's the name of your business unit?",
-                        "emoji": True,
-                    },
-                },
-                {
-                    "type": "input",
-                    "block_id": "block_team_name",
-                    "element": {
-                        "type": "plain_text_input",
-                        "action_id": "input_team_name",
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "And what's the name of your team?",
-                        "emoji": True,
-                    },
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Note:* The final org name will be your business unit and team name combined",
-                        }
-                    ],
-                },
-                {
-                    "type": "input",
-                    "block_id": "block_agreements",
-                    "element": {
-                        "type": "checkboxes",
-                        "options": [
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "I understand I will initially be responsible for adding team members and "
-                                    "managing their permissions",
-                                    "emoji": True,
-                                },
-                                "value": "ack_responsible",
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "I have permission to create a Snyk organisation for my team and business"
-                                    " unit",
-                                    "emoji": True,
-                                },
-                                "value": "ack_permission",
-                            },
-                        ],
-                        "action_id": "checkboxes-action",
-                    },
-                    "label": {
-                        "type": "plain_text",
-                        "text": "Agreements",
-                        "emoji": True,
-                    },
-                },
-            ],
-        },
+        trigger_id=body["trigger_id"], view=load_blocks_views("views/create_org_modal")
     )
 
 
 @app.view("create_org_callback")
-def handle_view_events(ack, body, client, say):
+def create_org_callback(ack, body, client, say):
+    """
+    Handles when the user clicks the submit button the modal
+    :param ack: slack ack
+    :param body: slack body
+    :param client: slack client
+    :param say: slack say
+    """
     ack()
     requesting_user = body["user"]
     requesting_user_email = app.client.users_info(user=requesting_user["id"])["user"][
@@ -148,37 +93,11 @@ def handle_view_events(ack, body, client, say):
     if not snyk_user:
         say(
             channel=channel_id,
-            blocks=[
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Great, I've got your request!*",
-                    },
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"Before your request is processed you *must* first log in to Snyk via {sso_provider_name}. This is to ensure that when we create your org we can assign you admin rights. <{sso_provider_link}|Open {sso_provider_name}>",
-                    },
-                },
-                {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": f":white_check_mark: I've signed in via {sso_provider_name}",
-                                "emoji": True,
-                            },
-                            "value": "sso_confirmed",
-                            "action_id": "action-sso-confirmed",
-                        }
-                    ],
-                },
-            ],
+            blocks=load_blocks_views(
+                "blocks/sso_confirm",
+                sso_provider_name=sso_provider_name,
+                sso_provider_link=sso_provider_link,
+            ),
         )
     else:
         confirm_org(None, say, channel_id)
@@ -186,51 +105,32 @@ def handle_view_events(ack, body, client, say):
 
 @app.action("action-sso-confirmed")
 def confirm_org(ack, say, channel_id):
+    """
+    Handles when the user clicks confirm button when asked to confirm new org details
+    :param ack:  slack ack
+    :param say: slack say
+    :param channel_id: the channel ID we've open with the user (private thread)
+    """
     if ack:
         ack()
+    business_unit = channel_datastore[channel_id]["business_unit"]
+    team_name = channel_datastore[channel_id]["team_name"]
     say(
         channel=channel_id,
-        blocks=[
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"*Great! - We're set* I'll create an org named *{channel_datastore[channel_id]['business_unit']}-{channel_datastore[channel_id]['team_name']}* - does that look right?",
-                },
-            },
-            {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": ":white_check_mark: Looks good!",
-                            "emoji": True,
-                        },
-                        "style": "primary",
-                        "value": "confirmed",
-                        "action_id": "action-confirmed",
-                    },
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": ":no_entry: Something looks wrong",
-                            "emoji": True,
-                        },
-                        "style": "danger",
-                        "value": "cancelled",
-                        "action_id": "action-cancelled",
-                    },
-                ],
-            },
-        ],
+        blocks=load_blocks_views(
+            "blocks/create_confirm", business_unit=business_unit, team_name=team_name
+        ),
     )
 
 
 @app.action("action-confirmed")
-def handle_sso_confirm(ack, body, client, say):
+def handle_sso_confirm(ack, body, say):
+    """
+    Handles when the user clicks the "I've signed in via SSO" button
+    :param ack:  slack ack
+    :param say: slack say
+    :param body: slack body
+    """
     ack()
     channel_id = body["channel"]["id"]
     data = channel_datastore[channel_id]
@@ -294,40 +194,17 @@ def handle_sso_confirm(ack, body, client, say):
 
     # Let the user know we've created their org
     if result:
+        org_name = result["name"]
+        org_id = result["id"]
+        result_url = result["url"]
         say(
             channel=channel_id,
-            blocks=[
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": ":white_check_mark: *Looks good!* I have created your Snyk organisation and added you as an"
-                        " administrator user, here are the details:",
-                    },
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"The name of your organisation is *{result['name']}* and it's ID is *{result['id']}*",
-                    },
-                },
-                {
-                    "type": "section",
-                    "text": {"type": "mrkdwn", "text": "Link to your organisation"},
-                    "accessory": {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Click To Open",
-                            "emoji": True,
-                        },
-                        "value": "click_me_123",
-                        "url": result["url"],
-                        "action_id": "button-action",
-                    },
-                },
-            ],
+            blocks=load_blocks_views(
+                "blocks/org_created",
+                org_name=org_name,
+                org_id=org_id,
+                result_url=result_url,
+            ),
         )
     else:
         say(
@@ -335,12 +212,6 @@ def handle_sso_confirm(ack, body, client, say):
             channel=channel_id,
         )
     del channel_datastore[channel_id]
-
-
-@app.action("button-action")
-def handle_some_action(ack, body, logger):
-    ack()
-    logger.info(body)
 
 
 if __name__ == "__main__":

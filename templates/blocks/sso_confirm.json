@@ -1,0 +1,31 @@
+[
+   {
+      "type":"section",
+      "text":{
+         "type":"mrkdwn",
+         "text":"*Great, I've got your request!*"
+      }
+   },
+   {
+      "type":"section",
+      "text":{
+         "type":"mrkdwn",
+         "text":"Before your request is processed you *must* first log in to Snyk via {{sso_provider_name}}. This is to ensure that when we create your org we can assign you admin rights. <{{sso_provider_link}}|Open {{sso_provider_name}}>"
+      }
+   },
+   {
+      "type":"actions",
+      "elements":[
+         {
+            "type":"button",
+            "text":{
+               "type":"plain_text",
+               "text":":white_check_mark: I've signed in via {{sso_provider_name}}",
+               "emoji":true
+            },
+            "value":"sso_confirmed",
+            "action_id":"action-sso-confirmed"
+         }
+      ]
+   }
+]

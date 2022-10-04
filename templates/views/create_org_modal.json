@@ -1,0 +1,90 @@
+{
+   "type":"modal",
+   "callback_id":"create_org_callback",
+   "title":{
+      "type":"plain_text",
+      "text":"Snyk Org Creation Tool"
+   },
+   "submit":{
+      "type":"plain_text",
+      "text":"Create my organisation"
+   },
+   "blocks":[
+      {
+         "type":"section",
+         "text":{
+            "type":"mrkdwn",
+            "text":"*Let's get started.* To create your Snyk org, I'll first need some information from you."
+         }
+      },
+      {
+         "type":"divider"
+      },
+      {
+         "type":"input",
+         "block_id":"block_business_unit",
+         "element":{
+            "type":"plain_text_input",
+            "action_id":"input_business_unit"
+         },
+         "label":{
+            "type":"plain_text",
+            "text":"What's the name of your business unit?",
+            "emoji":true
+         }
+      },
+      {
+         "type":"input",
+         "block_id":"block_team_name",
+         "element":{
+            "type":"plain_text_input",
+            "action_id":"input_team_name"
+         },
+         "label":{
+            "type":"plain_text",
+            "text":"And what's the name of your team?",
+            "emoji":true
+         }
+      },
+      {
+         "type":"context",
+         "elements":[
+            {
+               "type":"mrkdwn",
+               "text":"*Note:* The final org name will be your business unit and team name combined"
+            }
+         ]
+      },
+      {
+         "type":"input",
+         "block_id":"block_agreements",
+         "element":{
+            "type":"checkboxes",
+            "options":[
+               {
+                  "text":{
+                     "type":"plain_text",
+                     "text":"I understand I will initially be responsible for adding team members and managing their permissions",
+                     "emoji":true
+                  },
+                  "value":"ack_responsible"
+               },
+               {
+                  "text":{
+                     "type":"plain_text",
+                     "text":"I have permission to create a Snyk organisation for my team and business unit",
+                     "emoji":true
+                  },
+                  "value":"ack_permission"
+               }
+            ],
+            "action_id":"checkboxes-action"
+         },
+         "label":{
+            "type":"plain_text",
+            "text":"Agreements",
+            "emoji":true
+         }
+      }
+   ]
+}
