@@ -21,8 +21,8 @@ Once the user tells the bot to create an organisation, a number of opinionated c
 ## How do I use it?
 
 ### Pre-requisites
-* First you'll need to create a Slack app following these [instructions](#).
-* You'll then need to configure your settings in the [settings.yaml](#) file.
+* First you'll need to create a Slack app following these [instructions](./docs/slack_app.md).
+* You'll then need to configure your settings in the [settings.yaml](./docs/settings_yaml.md) file.
 
 ### Running locally / testing
 ```bash
