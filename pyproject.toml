@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "snyk_org_slackbot"
+name = "nyk_org_slackbots"
 version = "0.1.0"
-description = "A Slack bot which allows you to provide self-service Snyk organisation creation to your users. "
+description = "A Slack bot which allows you to provide self-service Snyk organisation creation to your users."
 authors = ["Nathan Roys <nathan.roys@snyk.io>"]
 
 [tool.poetry.dependencies]

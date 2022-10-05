@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: snykbot
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+settingsFile: "/opt/settings.yaml"
+
+secretSnykToken: ""
+secretSlackAppToken: ""
+secretSlackBotToken: ""

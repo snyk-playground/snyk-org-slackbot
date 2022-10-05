@@ -1,0 +1,6 @@
+apiVersion: v2
+name: snyk-org-slackbot
+description: "A Slack bot which allows you to provide self-service Snyk organisation creation to your users."
+type: application
+version: 0.1.0
+appVersion: 0.1.0
