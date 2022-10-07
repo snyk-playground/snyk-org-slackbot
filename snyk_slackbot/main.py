@@ -60,7 +60,7 @@ def load_chat_message_templates():
     msgs = {}
     for template in glob.glob(f"{MESSAGE_TEMPLATE_DIR}/*.yaml"):
         template_key = os.path.splitext(template)[0].split("/")[-1]
-        print(template_key)
+        logger.info(f"Loaded chat template {template_key}")
         with open(template, "r") as file:
             yaml_data = yaml.safe_load(file)
             msgs[template_key] = yaml_data
