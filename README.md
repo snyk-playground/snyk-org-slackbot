@@ -38,5 +38,8 @@ docker build . -t snyk-slack-bot  # Tag with your image name
 docker run -v $(pwd)/settings.yaml:/opt/settings.yaml -e SETTINGS_FILE_PATH=/opt/settings.yaml -e SNYK_TOKEN=YOUR_SNYK_TOKEN -e SLACK_BOT_TOKEN=YOUR_BOT_TOKEN -e SLACK_APP_TOKEN=YOUR_APP_TOKEN snykbot
 ```
 
+### Customizing
+It's possible to change the chat messages and views to suit your liking. 
+See [customization](./docs/customization.md) for details.
 ## Contributing
 See [contributing.md](./.github/CONTRIBUTING.md).
