@@ -14,3 +14,23 @@ Please see `settings.yaml.example` for an example of settings.
 | command_create_org           | The slash command to create an org (the same as the one you will have generated in the Slack app step - without the /) | Yes           |
 | sso_sign_in_link             | The sign in link to your SSO provider - will prompt the user to log in via this link                                   | Yes           |
 | sso_provider_name            | The name of your SSO provider                                                                                          | Yes           |
+
+## Where to get your Snyk group ID
+1. Log in to Snyk and select your group from the dropdown menu
+
+![Group select](images/snyk_group_select.png)
+
+2. Click the settings cog wheel (in the top right corner)
+3. Under 'General' grab your group ID and use it for your settings.yaml file
+
+![Group settings](images/snyk_group_id.png)
+
+## Regex patterns
+For our business units and team names, the bot checks the user supplied values and compares them
+against the regex we set in our settings files. Below are some sample patterns which may help.
+
+| **Pattern** | **What it does**                              |
+|----------|-----------------------------------------------|
+| .*       | Will allow any input                          |
+| (finance&#124;technology)                                    | Will only allow either 'finance' or 'technology' |
+| company-.* | Will only allow inputs prefixed with 'company-' |

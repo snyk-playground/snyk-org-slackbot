@@ -1,1 +1,4 @@
 .dccache
+settings.yaml
+.idea
+.DS_Store

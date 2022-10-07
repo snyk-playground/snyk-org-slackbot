@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.name }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: SETTINGS_FILE_PATH
@@ -37,8 +37,10 @@ spec:
                   name: {{ .Release.Name }}-secret
                   key: SLACK_APP_TOKEN
           volumeMounts:
-            - name: config
-              mountPath: {{ .Values.settingsFile }}
+            - mountPath: {{ .Values.settingsFile }}
+              name: config
+              subPath: settings.yaml
+              readOnly: true
       volumes:
         - name: config
           configMap:

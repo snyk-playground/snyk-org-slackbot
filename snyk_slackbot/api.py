@@ -1,7 +1,21 @@
-import json
+import logging
 import os
 
 import snyk
+
+# Set up logger
+logger = logging.getLogger(__name__)
+logger.setLevel(os.getenv("LOG_LEVEL", default="INFO"))
+
+
+def get_org_admins(org):
+    """
+    Returns a list of org admins
+    :param org: the org object
+    :return: a list of org admins
+    """
+    logger.debug("Getting list of admins from %s" % org.name)
+    return org.members.filter(role="admin")
 
 
 class SnykApiFacade:
@@ -15,7 +29,8 @@ class SnykApiFacade:
 
     def create_organisation(self, name):
         """
-        Will try and create a new Snyk organisation with the given name, under the group defined in the settings file
+        Will try and create a new Snyk organisation with the given name, under the group defined
+        in the settings file
         :param name: the name of the org to create
         :return: Either the json response from the API, or False in the case of an error
         """
@@ -24,22 +39,26 @@ class SnykApiFacade:
                 "/org", {"name": name, "groupId": self.settings.config("snyk_group_id")}
             ).json()
         except Exception as e:
+            logger.error(
+                "Unable to create organisation, API call threw error %s" % str(e)
+            )
             return False
 
     def org_name_exists(self, name):
         """
-        Because it's possible for multiple orgs to have the same name within Snyk, we must manually check to ensure that
+        Because it's possible for multiple orgs to have the same name within Snyk, we must manually
+         check to ensure that
         our org name isn't already in Snyk.
         :param name: the name of the org (generated from user input)
         :return: Truthy (org id) if the org already exists within our group, False otherwise
         """
+        logger.debug("Checking if org %s already exists" % name)
         orgs = self.client_hl.organizations.filter(
             name=name
         )  # TODO: Filter by group ID here too
         if len(orgs) > 0:
             return [x.id for x in orgs]
-        else:
-            return False
+        return False
 
     def get_user(self, email_address):
         """
@@ -49,6 +68,7 @@ class SnykApiFacade:
         :return: a dict of the user if found, None otherwise
         """
         try:
+            logger.debug(f"Checking if user %s exists in Snyk" % email_address)
             result = self.client_ll.get(
                 f"/group/{self.settings.config('snyk_group_id')}/members"
             ).json()
@@ -57,7 +77,11 @@ class SnykApiFacade:
                 if user["email"] == email_address:
                     return user
         except Exception as e:
-            return None
+            logger.error(
+                "Error checking if user %s exists in Snyk - API threw error %s"
+                % email_address,
+                str(e),
+            )
         return None
 
     def add_user_to_org(self, org_id, user_id):
@@ -70,13 +94,18 @@ class SnykApiFacade:
         :return: True if addition was successful, False otherwise
         """
         try:
-            result = self.client_ll.post(
+            logger.debug(f"Adding user %s to org %s" % (user_id, org_id))
+            self.client_ll.post(
                 f"/group/{self.settings.config('snyk_group_id')}/org/{org_id}/members",
                 {"userId": user_id, "role": "admin"},
             ).json()
             return True
         except Exception as e:
-            return False
+            logger.error(
+                "Error adding user %s to org %s - API threw error %s"
+                % (user_id, org_id, str(e)),
+            )
+        return False
 
     def get_org_from_name(self, org_name):
         """
@@ -85,15 +114,11 @@ class SnykApiFacade:
         :return: the org id, or None if we weren't successful
         """
         try:
+            logger.debug("Looking up org %s by name" % org_name)
             found_org = self.client_hl.organizations.filter(name=org_name)[0]
             return found_org
         except Exception as e:
-            return None
-
-    def get_org_admins(self, org):
-        """
-        Returns a list of org admins
-        :param org: the org object
-        :return: a list of org admins
-        """
-        return org.members.filter(role="admin")
+            logger.error(
+                "Error getting org %s by name - API threw error %s" % (org_name, str(e))
+            )
+        return None

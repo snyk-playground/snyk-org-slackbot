@@ -1,0 +1,7 @@
+error_org_already_exists_message: "warning: I'm really sorry, your requested org '{{new_org_name}}' already exists. Your administrator does not allow duplicate org names. Please use the existing organisation :warning:"
+error_org_policy: "The name of the organisation you gave didn't match your organisational policies, please try again."
+error_org_no_admins: ":no_entry: It looks like this existing org doesn't have any admins.. Please reach out to your Snyk administrator for further help! :no_entry:"
+error_snyk_user_not_found: ":warning: I couldn't find your user in Snyk - please try again to log-in through {{sso_provider_name}} and request your organisation again!"
+error_org_create: "An error occurred and I wasn't able to create your organisation"
+message_tell_admins_existing_org: "If you need access to this organisation, please reach out to one of the existing org admins - {{admins_str}}"
+message_cancelled: "No problem, I've cancelled your request and no action has been taken."

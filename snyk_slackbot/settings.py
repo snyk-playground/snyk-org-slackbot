@@ -9,7 +9,7 @@ class Settings:
         :param file_name: the name of the setting file
         :return: an instance of the Settings class
         """
-        with open(file_name, "r") as file:
+        with open(file_name, "r", encoding="UTF-8") as file:
             return Settings(yaml.safe_load(file))
 
     def __init__(self, config):

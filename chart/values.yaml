@@ -1,10 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: snykbot
-  pullPolicy: IfNotPresent
+  pullPolicy: Never
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  name: "snykbot"
 
 nameOverride: ""
 fullnameOverride: ""
