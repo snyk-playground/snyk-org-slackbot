@@ -3,3 +3,4 @@ settings.yaml
 .idea
 .DS_Store
 test-values.yaml
+__pycache__/

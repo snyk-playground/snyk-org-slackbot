@@ -5,7 +5,7 @@ import os
 import re
 
 import yaml
-from api import SnykApiFacade
+from api import SnykApiFacade, get_org_admins
 from jinja2 import BaseLoader, Environment, FileSystemLoader
 from settings import Settings
 from slack_bolt import App
@@ -245,7 +245,7 @@ def handle_sso_confirm(ack, body, say):
             channel=channel_id,
         )
         org = api.get_org_from_name(new_org_name)
-        admins = Settings.get_org_admins(org)
+        admins = get_org_admins(org)
         email_admins = [x.email for x in admins]
         admins_str = ", ".join(email_admins)
         if len(email_admins) > 0:
