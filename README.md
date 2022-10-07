@@ -4,7 +4,7 @@ A Slack bot which allows you to provide self-service Snyk organisation creation 
 
 ## What does this bot do?
 This bot exposes commands to the Slack channels that you add it to. At the time of writing, the bot supports only a
-single command `/createorg`, which allows a user to request to create an organisation within Snyk. The bot will show a
+single command (the name of which is user configured), which allows a user to request to create an organisation within Snyk. The bot will show a
 dialog, asking the user for some input parameters; their business unit, their team name and it will also prompt them to
 accept some internal terms of service.
 

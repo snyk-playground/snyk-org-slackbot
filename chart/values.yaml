@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  pullPolicy: Never
-  # Overrides the image tag whose default is the chart appVersion.
-  name: "snykbot"
+  name: snykbot
+  tag: latest
+  pullPolicy: IfNotPresent
 
 nameOverride: ""
 fullnameOverride: ""
@@ -13,3 +13,11 @@ settingsFile: "/opt/settings.yaml"
 secretSnykToken: ""
 secretSlackAppToken: ""
 secretSlackBotToken: ""
+
+settingGroupId: ""
+settingAllowDuplicateOrgNames: ""
+settingBusinessUnitRegex: ""
+settingTeamNameRegex: ""
+settingCreateOrgCommand: ""
+settingSsoName: ""
+settingSsoSignInLink: ""

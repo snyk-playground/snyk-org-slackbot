@@ -73,7 +73,6 @@ class SnykApiFacade:
                 f"/group/{self.settings.config('snyk_group_id')}/members"
             ).json()
             for user in result:
-                print(user["email"])
                 if user["email"] == email_address:
                     return user
         except Exception as e:

@@ -12,22 +12,22 @@ data:
     snyk_token_env_var_name: "SNYK_TOKEN"
     
     # The group we'll be placing new orgs under
-    snyk_group_id: "YOUR_SNYK_GROUP"
+    snyk_group_id: {{ .Values.settingGroupId }}
     
     # Multiple orgs with the same name are allowed in Snyk, but should the bot allow this?
-    allow_duplicate_org_names: False
+    allow_duplicate_org_names: {{ .Values.settingAllowDuplicateOrgNames }}
     
     # Business unit must follow the regex pattern to be accepted
-    business_unit_regex_pattern: ".*"
+    business_unit_regex_pattern: {{ .Values.settingBusinessUnitRegex }}
     
     # Team name must follow the regex pattern to be accepted
-    team_name_regex_pattern: ".*"
+    team_name_regex_pattern: {{ .Values.settingTeamNameRegex }}
     
     # The command to use for creating an org
-    command_create_org: "createorg"
+    command_create_org: {{ .Values.settingCreateOrgCommand }}
     
     # The link we'll send users to, to log in to Snyk
-    sso_sign_in_link: "https://google.com"
+    sso_sign_in_link: {{ .Values.settingSsoSignInLink }}
     
     # SSO provider name
-    sso_provider_name: "Okta"
+    sso_provider_name: {{ .Values.settingSsoName }}
