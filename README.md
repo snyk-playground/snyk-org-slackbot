@@ -18,6 +18,8 @@ Once the user tells the bot to create an organisation, a number of opinionated c
 * The requesting user is added as an `admin` of the newly created org
   - **Note:** The users email on Slack **must** match their email on Snyk for correct mapping to occur
 
+![Modal Dialog](docs/images/create_org_flow.png)
+
 ## How do I use it?
 
 ### Pre-requisites
