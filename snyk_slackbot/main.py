@@ -60,8 +60,8 @@ def load_chat_message_templates():
     msgs = {}
     for template in glob.glob(f"{MESSAGE_TEMPLATE_DIR}/*.yaml"):
         template_key = os.path.splitext(template)[0].split("/")[-1]
-        logger.info(f"Loaded chat template {template_key}")
-        with open(template, "r") as file:
+        logger.info("Loaded chat template %s", template_key)
+        with open(template, "r", encoding="UTF-8") as file:
             yaml_data = yaml.safe_load(file)
             msgs[template_key] = yaml_data
     return msgs
@@ -90,7 +90,7 @@ def create_org_modal(ack, body, client):
     :param body: slack body
     :param client: slack client
     """
-    logger.info("Received %s command - showing modal dialog.." % command_create_org)
+    logger.info("Received %s command - showing modal dialog..", command_create_org)
     ack()
     client.views_open(
         trigger_id=body["trigger_id"], view=load_blocks_views("views/create_org_modal")
@@ -114,7 +114,7 @@ def create_org_callback(ack, body, client, say):
     snyk_user = api.get_user(requesting_user_email)
     view_state = body["view"]["state"]
     logger.info(
-        "%s submitted org creation modal dialog, opening DM channel" % requesting_user
+        "%s submitted org creation modal dialog, opening DM channel", requesting_user
     )
 
     # Let's open a DM channel with the requesting user
@@ -127,8 +127,10 @@ def create_org_callback(ack, body, client, say):
     ]
     team_name = view_state["values"]["block_team_name"]["input_team_name"]["value"]
     logger.info(
-        "%s has requested an org with business_unit=%s and "
-        "team_name=%s" % (requesting_user, business_unit, team_name)
+        "%s has requested an org with business_unit=%s and " "team_name=%s",
+        requesting_user,
+        business_unit,
+        team_name,
     )
 
     # Save this data for the next action handler
@@ -140,7 +142,9 @@ def create_org_callback(ack, body, client, say):
     if not snyk_user:
         logger.warning(
             "%s(%s) does not have a matching user in Snyk"
-            " - prompting them to log in" % (requesting_user, requesting_user_email),
+            " - prompting them to log in",
+            requesting_user,
+            requesting_user_email,
         )
         say(
             channel=channel_id,
@@ -152,8 +156,9 @@ def create_org_callback(ack, body, client, say):
         )
     else:
         logger.info(
-            "%s(%s) found a matching user in snyk - confirming request"
-            % (requesting_user, requesting_user_email),
+            "%s(%s) found a matching user in snyk - confirming request",
+            requesting_user,
+            requesting_user_email,
         )
         confirm_org(None, say, channel_id)
 
@@ -171,8 +176,9 @@ def confirm_org(ack, say, channel_id):
     business_unit = channel_datastore[channel_id]["business_unit"]
     team_name = channel_datastore[channel_id]["team_name"]
     logger.info(
-        "Request for %s-%s has been confirmed - attempting to create organisation"
-        % (business_unit, team_name),
+        "Request for %s-%s has been confirmed - attempting to create organisation",
+        business_unit,
+        team_name,
     )
     say(
         channel=channel_id,
@@ -184,6 +190,12 @@ def confirm_org(ack, say, channel_id):
 
 @app.action("action-cancelled")
 def handle_cancelled(ack, body, say):
+    """
+    Handles the cancelling of an org
+    :param ack: slack ack
+    :param body: slack body
+    :param say: slack say
+    """
     ack()
     channel_id = body["channel"]["id"]
     say(
@@ -219,8 +231,10 @@ def handle_sso_confirm(ack, body, say):
         team_name
     ):
         logger.warning(
-            "Request for %s did not match required patterns (business_unit=%s team_name=%s)"
-            % (new_org_name, business_unit_pattern, team_name_pattern),
+            "Request for %s did not match required patterns (business_unit=%s team_name=%s)",
+            new_org_name,
+            business_unit_pattern,
+            team_name_pattern,
         )
         say(
             text=get_chat_message("org_creation", "error_org_policy"),
@@ -234,7 +248,8 @@ def handle_sso_confirm(ack, body, say):
     ):
         logger.warning(
             "%s already exists in Snyk and allow_duplicate_org_names is set to False"
-            " - rejecting" % new_org_name
+            " - rejecting",
+            new_org_name,
         )
         say(
             text=get_chat_message(
@@ -249,9 +264,7 @@ def handle_sso_confirm(ack, body, say):
         email_admins = [x.email for x in admins]
         admins_str = ", ".join(email_admins)
         if len(email_admins) > 0:
-            logger.info(
-                "Found existing admins for %s [%s]" % (new_org_name, admins_str)
-            )
+            logger.info("Found existing admins for %s [%s]", new_org_name, admins_str)
             say(
                 text=get_chat_message(
                     "org_creation",
@@ -263,7 +276,8 @@ def handle_sso_confirm(ack, body, say):
         else:
             logger.warning(
                 "Requested organisation %s already exists and DOES NOT have any admins"
-                " associated - cannot proceed" % new_org_name
+                " associated - cannot proceed",
+                new_org_name,
             )
             say(
                 text=get_chat_message("org_creation", "error_org_no_admins"),
@@ -275,8 +289,8 @@ def handle_sso_confirm(ack, body, say):
     snyk_user = api.get_user(requesting_user_email)
     if not snyk_user:
         logger.warning(
-            "%s still does not exist in Snyk despite SSO log in confirmation"
-            % requesting_user_email
+            "%s still does not exist in Snyk despite SSO log in confirmation",
+            requesting_user_email,
         )
         say(
             text=get_chat_message(
@@ -299,7 +313,7 @@ def handle_sso_confirm(ack, body, say):
         org_name = result["name"]
         org_id = result["id"]
         result_url = result["url"]
-        logger.info("Org creation successful [name=%s, id=%s]" % (org_name, org_id))
+        logger.info("Org creation successful [name=%s, id=%s]", org_name, org_id)
         say(
             channel=channel_id,
             blocks=load_blocks_views(

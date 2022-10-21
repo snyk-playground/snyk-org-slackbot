@@ -1,5 +1,6 @@
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
 from .. import api
 from ..settings import Settings
@@ -27,10 +28,10 @@ def api_facade(valid_settings):
     return api.SnykApiFacade(valid_settings)
 
 
-@patch('snyk.models.Organization')
+@patch("snyk.models.Organization")
 def test_get_org_admins_calls_filter(org_mock):
     api.get_org_admins(org_mock)
-    org_mock.members.filter.assert_called_with(role='admin')
+    org_mock.members.filter.assert_called_with(role="admin")
 
 
 def test_org_org_admins_invalid_input_raises_exception():

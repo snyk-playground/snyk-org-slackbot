@@ -14,7 +14,7 @@ def get_org_admins(org):
     :param org: the org object
     :return: a list of org admins
     """
-    logger.debug("Getting list of admins from %s" % org.name)
+    logger.debug("Getting list of admins from %s", org.name)
     return org.members.filter(role="admin")
 
 
@@ -38,9 +38,9 @@ class SnykApiFacade:
             return self.client_ll.post(
                 "/org", {"name": name, "groupId": self.settings.config("snyk_group_id")}
             ).json()
-        except Exception as e:
+        except Exception as error:
             logger.error(
-                "Unable to create organisation, API call threw error %s" % str(e)
+                "Unable to create organisation, API call threw error %s", str(error)
             )
             return False
 
@@ -52,7 +52,7 @@ class SnykApiFacade:
         :param name: the name of the org (generated from user input)
         :return: Truthy (org id) if the org already exists within our group, False otherwise
         """
-        logger.debug("Checking if org %s already exists" % name)
+        logger.debug("Checking if org %s already exists", name)
         orgs = self.client_hl.organizations.filter(
             name=name
         )  # TODO: Filter by group ID here too
@@ -68,18 +68,18 @@ class SnykApiFacade:
         :return: a dict of the user if found, None otherwise
         """
         try:
-            logger.debug(f"Checking if user %s exists in Snyk" % email_address)
+            logger.debug("Checking if user %s exists in Snyk", email_address)
             result = self.client_ll.get(
                 f"/group/{self.settings.config('snyk_group_id')}/members"
             ).json()
             for user in result:
                 if user["email"] == email_address:
                     return user
-        except Exception as e:
+        except Exception as error:
             logger.error(
-                "Error checking if user %s exists in Snyk - API threw error %s"
-                % email_address,
-                str(e),
+                "Error checking if user %s exists in Snyk - API threw error %s",
+                email_address,
+                str(error),
             )
         return None
 
@@ -93,16 +93,18 @@ class SnykApiFacade:
         :return: True if addition was successful, False otherwise
         """
         try:
-            logger.debug(f"Adding user %s to org %s" % (user_id, org_id))
+            logger.debug("Adding user %s to org %s", user_id, org_id)
             self.client_ll.post(
                 f"/group/{self.settings.config('snyk_group_id')}/org/{org_id}/members",
                 {"userId": user_id, "role": "admin"},
             ).json()
             return True
-        except Exception as e:
+        except Exception as error:
             logger.error(
-                "Error adding user %s to org %s - API threw error %s"
-                % (user_id, org_id, str(e)),
+                "Error adding user %s to org %s - API threw error %s",
+                user_id,
+                org_id,
+                str(error),
             )
         return False
 
@@ -113,11 +115,13 @@ class SnykApiFacade:
         :return: the org id, or None if we weren't successful
         """
         try:
-            logger.debug("Looking up org %s by name" % org_name)
+            logger.debug("Looking up org %s by name", org_name)
             found_org = self.client_hl.organizations.filter(name=org_name)[0]
             return found_org
-        except Exception as e:
+        except Exception as error:
             logger.error(
-                "Error getting org %s by name - API threw error %s" % (org_name, str(e))
+                "Error getting org %s by name - API threw error %s",
+                org_name,
+                str(error),
             )
         return None
