@@ -1,8 +1,8 @@
-FROM ubuntu:22.04
+FROM python:3.11.0-bullseye
 
 # Pre reqs
 RUN apt update
-RUN apt install -y python3 python3-pip curl
+RUN apt install -y curl
 RUN pip3 install poetry
 
 # Set up our source dir
