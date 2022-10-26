@@ -93,7 +93,8 @@ def create_org_modal(ack, body, client):
     logger.info("Received %s command - showing modal dialog..", command_create_org)
     ack()
     client.views_open(
-        trigger_id=body["trigger_id"], view=load_blocks_views("views/create_org_modal")
+        trigger_id=body.get("trigger_id"),
+        view=load_blocks_views("views/create_org_modal"),
     )
 
 
@@ -107,27 +108,38 @@ def create_org_callback(ack, body, client, say):
     :param say: slack say
     """
     ack()
-    requesting_user = body["user"]
-    requesting_user_email = app.client.users_info(user=requesting_user["id"])["user"][
-        "profile"
-    ]["email"]
+    requesting_user = body.get("user")
+    requesting_user_email = (
+        app.client.users_info(user=requesting_user.get("id"))
+        .get("user", {})
+        .get("profile", {})
+        .get("email")
+    )
     snyk_user = api.get_user(requesting_user_email)
-    view_state = body["view"]["state"]
+    view_state = body.get("view", {}).get("state")
     logger.info(
         "%s submitted org creation modal dialog, opening DM channel", requesting_user
     )
 
     # Let's open a DM channel with the requesting user
-    conversation = client.conversations_open(users=requesting_user["id"])
-    channel_id = conversation["channel"]["id"]
+    conversation = client.conversations_open(users=requesting_user.get("id"))
+    channel_id = conversation.get("channel", {}).get("id")
 
     # Extract the input from the modal output
-    business_unit = view_state["values"]["block_business_unit"]["input_business_unit"][
-        "value"
-    ]
-    team_name = view_state["values"]["block_team_name"]["input_team_name"]["value"]
+    business_unit = (
+        view_state.get("values", {})
+        .get("block_business_unit", {})
+        .get("input_business_unit", {})
+        .get("value")
+    )
+    team_name = (
+        view_state.get("values", {})
+        .get("block_team_name", {})
+        .get("input_team_name", {})
+        .get("value")
+    )
     logger.info(
-        "%s has requested an org with business_unit=%s and " "team_name=%s",
+        "%s has requested an org with business_unit=%s and team_name=%s",
         requesting_user,
         business_unit,
         team_name,
@@ -173,8 +185,8 @@ def confirm_org(ack, say, channel_id):
     """
     if ack:
         ack()
-    business_unit = channel_datastore[channel_id]["business_unit"]
-    team_name = channel_datastore[channel_id]["team_name"]
+    business_unit = channel_datastore.get(channel_id, {}).get("business_unit")
+    team_name = channel_datastore.get(channel_id, {}).get("team_name")
     logger.info(
         "Request for %s-%s has been confirmed - attempting to create organisation",
         business_unit,
@@ -197,7 +209,7 @@ def handle_cancelled(ack, body, say):
     :param say: slack say
     """
     ack()
-    channel_id = body["channel"]["id"]
+    channel_id = body.get("channel", {}).get("id")
     say(
         text=get_chat_message(
             "org_creation",
@@ -216,14 +228,17 @@ def handle_sso_confirm(ack, body, say):
     :param body: slack body
     """
     ack()
-    channel_id = body["channel"]["id"]
-    data = channel_datastore[channel_id]
-    business_unit = data["business_unit"]
-    team_name = data["team_name"]
-    requesting_user = data["requesting_user"]
-    requesting_user_email = app.client.users_info(user=requesting_user["id"])["user"][
-        "profile"
-    ]["email"]
+    channel_id = body.get("channel", {}).get("id")
+    data = channel_datastore.get(channel_id, {})
+    business_unit = data.get("business_unit")
+    team_name = data.get("team_name")
+    requesting_user = data.get("requesting_user")
+    requesting_user_email = (
+        app.client.users_info(user=requesting_user.get("id"))
+        .get("user", {})
+        .get("profile", {})
+        .get("email")
+    )
     new_org_name = f"{business_unit}-{team_name}"
 
     # Ensure org name matches defined pattern
@@ -306,13 +321,13 @@ def handle_sso_confirm(ack, body, say):
     result = api.create_organisation(new_org_name)
 
     # Add the user to the org
-    api.add_user_to_org(result["id"], snyk_user["id"])
+    api.add_user_to_org(result.get("id"), snyk_user.get("id"))
 
     # Let the user know we've created their org
     if result:
-        org_name = result["name"]
-        org_id = result["id"]
-        result_url = result["url"]
+        org_name = result.get("name")
+        org_id = result.get("id")
+        result_url = result.get("url")
         logger.info("Org creation successful [name=%s, id=%s]", org_name, org_id)
         say(
             channel=channel_id,

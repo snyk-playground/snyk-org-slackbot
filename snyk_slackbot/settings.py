@@ -21,7 +21,7 @@ class Settings:
         :param name: the key of the setting
         :return: the setting value
         """
-        return self.__conf[name]
+        return self.__conf.get(name)
 
     def set(self, name, value):
         """

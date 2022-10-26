@@ -20,7 +20,7 @@ def get_org_admins(org):
 
 class SnykApiFacade:
     def __init__(self, settings):
-        token = os.environ[settings.config("snyk_token_env_var_name")]
+        token = os.getenv(settings.config("snyk_token_env_var_name"))
         self.settings = settings
         self.client_ll = snyk.SnykClient(
             token, version="2022-08-12", url="https://api.snyk.io/api/v1"
@@ -56,7 +56,7 @@ class SnykApiFacade:
         orgs = self.client_hl.organizations.filter(
             name=name
         )  # TODO: Filter by group ID here too
-        if len(orgs) > 0:
+        if orgs:
             return [x.id for x in orgs]
         return False
 
@@ -73,7 +73,7 @@ class SnykApiFacade:
                 f"/group/{self.settings.config('snyk_group_id')}/members"
             ).json()
             for user in result:
-                if user["email"] == email_address:
+                if user.get("email") == email_address:
                     return user
         except Exception as error:
             logger.error(
