@@ -34,14 +34,6 @@ jobs:
           load: true
           platforms: ${{matrix.platform}}
           tags: ghcr.io/snyk-playground/snyk-org-slackbot:${{ github.sha }}
-      - name: Snyk Container Test
-        run: snyk container test ghcr.io/snyk-playground/snyk-org-slackbot:${{ github.sha }} --platform=${{matrix.platform}} --exclude-base-image-vulns --file=Dockerfile --org=ie-playground --severity-threshold=critical --project-lifecycle=development
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      - name: Snyk Container Monitor
-        run: snyk container monitor ghcr.io/snyk-playground/snyk-org-slackbotc:$GITHUB_SHA --platform=${{matrix.platform}} --file=Dockerfile --org=ie-playground --project-lifecycle=development --tags=gitsha=$GITHUB_SHA,app=snyk-org-slackbot
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
