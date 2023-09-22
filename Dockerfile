@@ -1,4 +1,4 @@
-FROM python:3.11.0-bullseye
+FROM python:3.12.0rc3-bullseye
 
 # Pre reqs
 RUN apt update
